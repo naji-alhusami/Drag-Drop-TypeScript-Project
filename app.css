@@ -38,8 +38,8 @@
   
   button {
     font: inherit;
-    background: #ff0062;
-    border: 1px solid #ff0062;
+    background: #84ff00;
+    border: 2px solid #000000;
     cursor: pointer;
     color: white;
     padding: 0.75rem 1rem;
@@ -51,8 +51,8 @@
   
   button:hover,
   button:active {
-    background: #a80041;
-    border-color: #a80041;
+    background: #195400;
+    border-color: #195400;
   }
   
   .projects {
@@ -94,7 +94,7 @@
   }
   
   .projects li h2 {
-    color: #ff0062;
+    color: #001aff;
     margin: 0.5rem 0;
   }
   
