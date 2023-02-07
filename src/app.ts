@@ -1,3 +1,44 @@
+interface Validation {
+    value: string | number;
+    required?: boolean; // "?" optional OR boolean | undefined
+    minLen?: number; // check the length of the string
+    maxLen?: number;
+    min?: number; // check the value of the number
+    max?: number;
+}
+
+function validate(inputValidation: Validation) {
+  let isValid = true;
+  if (inputValidation.required) {
+    isValid = isValid && inputValidation.value.toString().trim().length !== 0;
+  }
+  if (
+    inputValidation.minLen != null &&
+    typeof inputValidation.value === "string"
+  ) {
+    isValid = isValid && inputValidation.value.length >= inputValidation.minLen;
+  }
+  if (
+    inputValidation.maxLen != null &&
+    typeof inputValidation.value === "string"
+  ) {
+    isValid = isValid && inputValidation.value.length <= inputValidation.maxLen;
+  }
+  if (
+    inputValidation.min != null &&
+    typeof inputValidation.value === "number"
+  ) {
+    isValid = isValid && inputValidation.value >= inputValidation.min;
+  }
+  if (
+    inputValidation.max != null &&
+    typeof inputValidation.value === "number"
+  ) {
+    isValid = isValid && inputValidation.value <= inputValidation.max;
+  }
+  return isValid;
+}
+
 function AutoBind(_: any, _2: string, descriptor: PropertyDescriptor) {
   const originalMethod = descriptor.value;
   const adjDescriptor: PropertyDescriptor = {
@@ -40,10 +81,39 @@ class ProjectInput {
     this.attach();
   }
 
+  private collectingUserInputs(): [string, string, number] | void {
+    const enteredTitle = this.titleInput.value;
+    const enteredDesc = this.descInput.value;
+    const enteredPeople = this.peopleInput.value;
+
+    if (
+      !validate({ value: enteredTitle, required: true }) ||
+      !validate({
+        value: enteredDesc,
+        required: true,
+        minLen: 5,
+        maxLen: 20,
+      }) ||
+      !validate({ value: +enteredPeople, required: true, min: 1, max: 10 })
+    ) {
+      alert("Please Try Again With Validatable Values");
+      return;
+    } else {
+      return [enteredTitle, enteredDesc, +enteredPeople];
+    }
+  }
+
   @AutoBind
   private submitHandler(event: Event) {
     event.preventDefault();
-    console.log(this.titleInput.value);
+    const inputs = this.collectingUserInputs();
+    if (Array.isArray(inputs)) {
+      const [title, description, people] = inputs;
+      console.log(title, description, people);
+      this.titleInput.value = '';
+      this.descInput.value = '';
+      this.peopleInput.value = '';
+    }
   }
 
   private config() {
