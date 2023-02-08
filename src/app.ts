@@ -88,6 +88,34 @@ function AutoBind(_: any, _2: string, descriptor: PropertyDescriptor) {
   return adjDescriptor;
 }
 
+class ProjectList {
+  tempEl: HTMLTemplateElement;
+  hostEl: HTMLDivElement;
+  element: HTMLElement;
+
+  constructor(private type: "active" | "finished") {
+    this.tempEl = document.getElementById(
+      "project-list"
+    )! as HTMLTemplateElement;
+    this.hostEl = document.getElementById("app")! as HTMLDivElement;
+    const importedNode = document.importNode(this.tempEl.content, true);
+    this.element = importedNode.firstElementChild as HTMLElement;
+    this.element.id = `${this.type}-projects`;
+    this.attach();
+    this.renderContent();
+  }
+
+  private renderContent() {
+    this.element.querySelector("h2")!.textContent = this.type.toUpperCase() + " PROJECTS";
+    const listId = `${this.type}-projects-list`;
+    this.element.querySelector("ul")!.id = listId;
+  }
+
+  private attach() {
+    this.hostEl.insertAdjacentElement("beforeend", this.element);
+  }
+}
+
 class ProjectInput {
   tempEl: HTMLTemplateElement;
   hostEl: HTMLDivElement;
@@ -103,7 +131,7 @@ class ProjectInput {
     this.hostEl = document.getElementById("app")! as HTMLDivElement;
 
     const importedNode = document.importNode(this.tempEl.content, true); // take the content of the template.
-    this.element = importedNode.firstElementChild as HTMLFormElement; // put the content of the importNode inside the host which is div 'app'.
+    this.element = importedNode.firstElementChild as HTMLFormElement; // put the content of the importNode inside the element which is form
     this.element.id = "user-input";
 
     this.titleInput = this.element.querySelector("#title") as HTMLInputElement;
@@ -188,4 +216,6 @@ class ProjectInput {
   }
 }
 
-const prjInput = new ProjectInput();
+const projectInput = new ProjectInput();
+const activeProject = new ProjectList("active");
+const finishedProject = new ProjectList("finished");
