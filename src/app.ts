@@ -138,6 +138,39 @@ function AutoBind(_: any, _2: string, descriptor: PropertyDescriptor) {
   return adjDescriptor;
 }
 
+//General Class:
+abstract class GeneralClass<T extends HTMLElement, U extends HTMLElement> { // we added abstract because it should always use for inheritance
+  tempEl: HTMLTemplateElement;
+  hostEl: T;
+  element: U;
+
+  constructor(
+    templateId: string,
+    hostElementId: string,
+    elementLocation: boolean,
+    newElementId?: string
+  ) {
+    this.tempEl = document.getElementById(templateId)! as HTMLTemplateElement;
+    this.hostEl = document.getElementById(hostElementId)! as T;
+    const importedNode = document.importNode(this.tempEl.content, true);
+    this.element = importedNode.firstElementChild as U;
+    if (newElementId) {
+      this.element.id = newElementId;
+    }
+    this.attach(elementLocation);
+  }
+
+  private attach(elementLocation: boolean) {
+    this.hostEl.insertAdjacentElement(
+      elementLocation ? "afterbegin" : "beforeend",
+      this.element
+    );
+  }
+
+  abstract configure(): void; // we added it without any coding to make sure that it should be used in inheritance classes
+  abstract renderContent(): void; // we added it without any coding to make sure that it should be used in inheritance classes
+}
+
 class ProjectList {
   tempEl: HTMLTemplateElement;
   hostEl: HTMLDivElement;
@@ -160,7 +193,7 @@ class ProjectList {
         if (this.type === "active") {
           return project.status === ProjectStatus.Active;
         }
-          return project.status === ProjectStatus.Finished;
+        return project.status === ProjectStatus.Finished;
       });
       this.assignedProjects = filteredProjects;
       this.renderProjects();
@@ -174,7 +207,7 @@ class ProjectList {
     const listEl = document.getElementById(
       `${this.type}-projects-list`
     )! as HTMLUListElement;
-    listEl.innerHTML='';
+    listEl.innerHTML = "";
     for (const projectItem of this.assignedProjects) {
       const listItem = document.createElement("li");
       listItem.textContent = projectItem.title;
