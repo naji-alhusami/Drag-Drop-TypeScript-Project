@@ -239,10 +239,7 @@ class ProjectList extends GeneralClass<HTMLDivElement, HTMLElement> {
     )! as HTMLUListElement;
     listEl.innerHTML = "";
     for (const projectItem of this.assignedProjects) {
-      const listItem = document.createElement("li");
-      listItem.textContent = projectItem.title;
-      listEl.appendChild(listItem);
-      new ProjectItem(this.element.querySelector('ul')!.id, projectItem);
+      new ProjectItem(this.element.querySelector("ul")!.id, projectItem);
     }
   }
 }
