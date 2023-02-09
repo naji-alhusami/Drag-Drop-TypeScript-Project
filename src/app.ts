@@ -61,12 +61,22 @@ class ProjectState extends GeneralState<Project> {
       ProjectStatus.Active
     );
     this.projects.push(newProject);
+    this.updateListeners();
+  }
+
+  switchProjectStatus(projectId: string, newStatus: ProjectStatus) {
+    const project = this.projects.find((project) => project.id === projectId);
+    if (project && project.status !== newStatus) {
+      project.status = newStatus;
+      this.updateListeners();
+    }
+  }
+
+  private updateListeners() {
     for (const listenerFn of this.listeners) {
       listenerFn(this.projects.slice());
     }
   }
-
-  switchProjectStatus(){}
 }
 const projectState = ProjectState.getInstance(); // we guarantee to always working with the exact same object
 
@@ -262,8 +272,13 @@ class ProjectList
     }
   }
 
+  @AutoBind
   dropHandler(event: DragEvent) {
-    console.log(event.dataTransfer!.getData('text/plain'));
+    const projectId = event.dataTransfer!.getData("text/plain");
+    projectState.switchProjectStatus(
+      projectId,
+      this.type === "active" ? ProjectStatus.Active : ProjectStatus.Finished
+    );
   }
 
   @AutoBind
