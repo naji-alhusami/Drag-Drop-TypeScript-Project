@@ -13,14 +13,24 @@ class Project {
   ) {}
 }
 
-type Listener = (items: Project[]) => void;
+type Listener<T> = (items: T[]) => void;
 
-class ProjectState {
-  private listeners: Listener[] = [];
+class GeneralState<T> {
+  protected listeners: Listener<T>[] = [];
+
+  addListener(listenerFn: Listener<T>) {
+    this.listeners.push(listenerFn);
+  }
+
+}
+
+class ProjectState extends GeneralState<Project> {
   private projects: Project[] = [];
   private static instance: ProjectState;
 
-  private constructor() {}
+  private constructor() {
+    super();
+  }
 
   static getInstance() {
     if (this.instance) {
@@ -30,9 +40,7 @@ class ProjectState {
     return this.instance;
   }
 
-  addListener(listenerFn: Listener) {
-    this.listeners.push(listenerFn);
-  }
+  
 
   addProject(title: string, description: string, people: number) {
     const newProject = new Project(
@@ -139,7 +147,8 @@ function AutoBind(_: any, _2: string, descriptor: PropertyDescriptor) {
 }
 
 //General Class:
-abstract class GeneralClass<T extends HTMLElement, U extends HTMLElement> { // we added abstract because it should always use for inheritance
+abstract class GeneralClass<T extends HTMLElement, U extends HTMLElement> {
+  // we added abstract because it should always use for inheritance
   tempEl: HTMLTemplateElement;
   hostEl: T;
   element: U;
@@ -152,8 +161,8 @@ abstract class GeneralClass<T extends HTMLElement, U extends HTMLElement> { // w
   ) {
     this.tempEl = document.getElementById(templateId)! as HTMLTemplateElement;
     this.hostEl = document.getElementById(hostElementId)! as T;
-    const importedNode = document.importNode(this.tempEl.content, true);
-    this.element = importedNode.firstElementChild as U;
+    const importedNode = document.importNode(this.tempEl.content, true); // take the content of the template.
+    this.element = importedNode.firstElementChild as U; // put the content of the importNode inside the element which is form
     if (newElementId) {
       this.element.id = newElementId;
     }
@@ -171,23 +180,22 @@ abstract class GeneralClass<T extends HTMLElement, U extends HTMLElement> { // w
   abstract renderContent(): void; // we added it without any coding to make sure that it should be used in inheritance classes
 }
 
-class ProjectList {
-  tempEl: HTMLTemplateElement;
-  hostEl: HTMLDivElement;
-  element: HTMLElement;
+class ProjectList extends GeneralClass<HTMLDivElement, HTMLElement> {
   assignedProjects: Project[];
 
   constructor(private type: "active" | "finished") {
+    super("project-list", "app", false, `${type}-projects`);
     this.tempEl = document.getElementById(
       "project-list"
     )! as HTMLTemplateElement;
     this.hostEl = document.getElementById("app")! as HTMLDivElement;
     this.assignedProjects = [];
 
-    const importedNode = document.importNode(this.tempEl.content, true);
-    this.element = importedNode.firstElementChild as HTMLElement;
-    this.element.id = `${this.type}-projects`;
+    this.configure();
+    this.renderContent();
+  }
 
+  configure() {
     projectState.addListener((projects: Project[]) => {
       const filteredProjects = projects.filter((project) => {
         if (this.type === "active") {
@@ -198,9 +206,13 @@ class ProjectList {
       this.assignedProjects = filteredProjects;
       this.renderProjects();
     });
+  }
 
-    this.attach();
-    this.renderContent();
+  renderContent() {
+    const listId = `${this.type}-projects-list`;
+    this.element.querySelector("ul")!.id = listId;
+    this.element.querySelector("h2")!.textContent =
+      this.type.toUpperCase() + " PROJECTS";
   }
 
   private renderProjects() {
@@ -214,36 +226,15 @@ class ProjectList {
       listEl.appendChild(listItem);
     }
   }
-
-  private renderContent() {
-    const listId = `${this.type}-projects-list`;
-    this.element.querySelector("ul")!.id = listId;
-    this.element.querySelector("h2")!.textContent =
-      this.type.toUpperCase() + " PROJECTS";
-  }
-
-  private attach() {
-    this.hostEl.insertAdjacentElement("beforeend", this.element);
-  }
 }
 
-class ProjectInput {
-  tempEl: HTMLTemplateElement;
-  hostEl: HTMLDivElement;
-  element: HTMLFormElement;
+class ProjectInput extends GeneralClass<HTMLDivElement, HTMLFormElement> {
   titleInput: HTMLInputElement;
   descInput: HTMLInputElement;
   peopleInput: HTMLInputElement;
 
   constructor() {
-    this.tempEl = document.getElementById(
-      "project-input"
-    )! as HTMLTemplateElement;
-    this.hostEl = document.getElementById("app")! as HTMLDivElement;
-
-    const importedNode = document.importNode(this.tempEl.content, true); // take the content of the template.
-    this.element = importedNode.firstElementChild as HTMLFormElement; // put the content of the importNode inside the element which is form
-    this.element.id = "user-input";
+    super("project-input", "app", true, "user-input");
 
     this.titleInput = this.element.querySelector("#title") as HTMLInputElement;
     this.descInput = this.element.querySelector(
@@ -253,9 +244,14 @@ class ProjectInput {
       "#people"
     ) as HTMLInputElement;
 
-    this.config();
-    this.attach();
+    this.configure();
   }
+
+  configure() {
+    this.element.addEventListener("submit", this.submitHandler);
+  }
+
+  renderContent() {}
 
   private collectingUserInputs(): [string, string, number] | void {
     const enteredTitle = this.titleInput.value;
@@ -313,14 +309,6 @@ class ProjectInput {
       this.descInput.value = "";
       this.peopleInput.value = "";
     }
-  }
-
-  private config() {
-    this.element.addEventListener("submit", this.submitHandler);
-  }
-
-  private attach() {
-    this.hostEl.insertAdjacentElement("afterbegin", this.element); // insert the form element inside the host.
   }
 }
 
