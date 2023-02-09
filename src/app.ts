@@ -65,6 +65,8 @@ class ProjectState extends GeneralState<Project> {
       listenerFn(this.projects.slice());
     }
   }
+
+  switchProjectStatus(){}
 }
 const projectState = ProjectState.getInstance(); // we guarantee to always working with the exact same object
 
@@ -214,7 +216,8 @@ class ProjectItem
 
   @AutoBind
   startHandler(event: DragEvent) {
-    console.log(event);
+    event.dataTransfer!.setData("text/plain", this.project.id);
+    event.dataTransfer!.effectAllowed = "move";
   }
   endHandler(_: DragEvent) {
     console.log("drag end");
@@ -232,7 +235,10 @@ class ProjectItem
   }
 }
 
-class ProjectList extends GeneralClass<HTMLDivElement, HTMLElement> {
+class ProjectList
+  extends GeneralClass<HTMLDivElement, HTMLElement>
+  implements DragGoal
+{
   assignedProjects: Project[];
 
   constructor(private type: "active" | "finished") {
@@ -247,7 +253,30 @@ class ProjectList extends GeneralClass<HTMLDivElement, HTMLElement> {
     this.renderContent();
   }
 
+  @AutoBind
+  overHandler(event: DragEvent) {
+    if (event.dataTransfer && event.dataTransfer.types[0] === "text/plain") {
+      event.preventDefault();
+      const listEl = this.element.querySelector("ul")!;
+      listEl.classList.add("droppable");
+    }
+  }
+
+  dropHandler(event: DragEvent) {
+    console.log(event.dataTransfer!.getData('text/plain'));
+  }
+
+  @AutoBind
+  leaveHandler(_: DragEvent) {
+    const listEl = this.element.querySelector("ul")!;
+    listEl.classList.remove("droppable");
+  }
+
   configure() {
+    this.element.addEventListener("dragover", this.overHandler);
+    this.element.addEventListener("drop", this.dropHandler);
+    this.element.addEventListener("dragleave", this.leaveHandler);
+
     projectState.addListener((projects: Project[]) => {
       const filteredProjects = projects.filter((project) => {
         if (this.type === "active") {
