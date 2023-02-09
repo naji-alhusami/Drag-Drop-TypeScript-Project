@@ -1,3 +1,16 @@
+// We add this interface to ProjectItem class
+interface Drag {
+  startHandler(event: DragEvent): void;
+  endHandler(event: DragEvent): void;
+}
+
+// We add this interface to ProjectList class
+interface DragGoal {
+  overHandler(event: DragEvent): void; // signal the browser that the thing the we are dragging to some target is a valid target (permit the drop)
+  dropHandler(event: DragEvent): void; // handle the drop (we can update the data)
+  leaveHandler(event: DragEvent): void; // give visual feedback about the result of the dragging
+}
+
 enum ProjectStatus {
   Active,
   Finished,
@@ -177,14 +190,17 @@ abstract class GeneralClass<T extends HTMLElement, U extends HTMLElement> {
   abstract renderContent(): void; // we added it without any coding to make sure that it should be used in inheritance classes
 }
 
-class ProjectItem extends GeneralClass<HTMLUListElement, HTMLLIElement> {
+class ProjectItem
+  extends GeneralClass<HTMLUListElement, HTMLLIElement>
+  implements Drag
+{
   private project: Project;
 
-  get persons(){
-    if(this.project.people === 1) {
-      return "1 Person"
+  get persons() {
+    if (this.project.people === 1) {
+      return "1 Person";
     } else {
-      return `${this.project.people} Persons`
+      return `${this.project.people} Persons`;
     }
   }
 
@@ -196,12 +212,22 @@ class ProjectItem extends GeneralClass<HTMLUListElement, HTMLLIElement> {
     this.renderContent();
   }
 
-  configure() {}
+  @AutoBind
+  startHandler(event: DragEvent) {
+    console.log(event);
+  }
+  endHandler(_: DragEvent) {
+    console.log("drag end");
+  }
+
+  configure() {
+    this.element.addEventListener("dragstart", this.startHandler);
+    this.element.addEventListener("dragend", this.endHandler);
+  }
 
   renderContent() {
     this.element.querySelector("h2")!.textContent = this.project.title;
-    this.element.querySelector("h3")!.textContent =
-      this.persons + ' Assigned';
+    this.element.querySelector("h3")!.textContent = this.persons + " Assigned";
     this.element.querySelector("p")!.textContent = this.project.description;
   }
 }
