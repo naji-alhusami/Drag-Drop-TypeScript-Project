@@ -1,7 +1,7 @@
-import { GeneralClass } from "./general-class.js";
-import { Validation, validate, showCustomAlert } from "../util/validation.js";
-import { AutoBind } from "../decorators/autobind.js";
-import { projectState } from "../state/project-state.js";
+import { GeneralClass } from "./general-class";
+import { Validation, validate, showCustomAlert } from "../util/validation";
+import { AutoBind } from "../decorators/autobind";
+import { projectState } from "../state/project-state";
 
 export class ProjectInput extends GeneralClass<HTMLDivElement, HTMLFormElement> {
     titleInput: HTMLInputElement;

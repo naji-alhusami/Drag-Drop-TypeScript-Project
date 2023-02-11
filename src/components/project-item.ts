@@ -1,6 +1,7 @@
-import { GeneralClass } from "./general-class.js";
-import { Drag } from "../models/drag-drop.js";
-import { AutoBind } from "../decorators/autobind.js";
+import { GeneralClass } from "./general-class";
+import { Drag } from "../models/drag-drop";
+import { AutoBind } from "../decorators/autobind";
+import { Project } from "../models/project";
 
 export class ProjectItem
   extends GeneralClass<HTMLUListElement, HTMLLIElement>

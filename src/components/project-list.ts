@@ -1,9 +1,9 @@
-import { GeneralClass } from "./general-class.js";
-import { DragGoal } from "../models/drag-drop.js";
-import { AutoBind } from "../decorators/autobind.js";
-import { projectState } from "../state/project-state.js";
-import { ProjectItem } from "./project-item.js";
-import { Project, ProjectStatus } from "../models/project.js";
+import { GeneralClass } from "./general-class";
+import { DragGoal } from "../models/drag-drop";
+import { AutoBind } from "../decorators/autobind";
+import { projectState } from "../state/project-state";
+import { ProjectItem } from "./project-item";
+import { Project, ProjectStatus } from "../models/project";
 
 export class ProjectList
   extends GeneralClass<HTMLDivElement, HTMLElement>
